@@ -11,62 +11,84 @@ public class VideoPlayerController : MonoBehaviour
 
     public int fastForwardTime = 5;
 
-    public VideoClip clip;
+    public Slider videoSlider;
 
-    public Slider movieSlider;
+    private float currVideoLength;
 
-    float currVideoLength;
+    public delegate void VideoPlayerReadyEvent();
+    public static VideoPlayerReadyEvent VideoPlayerReadyCB;
 
-    string movieClipFolderPath = "";
+    public delegate void VideoPlayPausedEvent(bool status);
+    public static VideoPlayPausedEvent VideoPlayPausedCB;
 
-    [SerializeField]
-    private List<string> availableVideosList;
+    public delegate void UpdateVideoPlaybackTime(string endingtime, bool doOnce);
+    public static UpdateVideoPlaybackTime UpdateVideoTimeCB;
 
-    private void Start()
+    private bool isPaused = false;
+
+    private void Awake()
     {
-        
-        // movieClipFolderPath = Application.streamingAssetsPath + "/Videos/Video1.mp4";
-        //player.url = movieClipFolderPath;
-        //player.Prepare();
-        //player.prepareCompleted += PlayVideo;
-        movieClipFolderPath = Application.streamingAssetsPath + "/Videos";
-        DirectoryInfo d = new DirectoryInfo(movieClipFolderPath);
-        string fileName = "";
-        foreach (var file in d.GetFiles("*.mp4"))
-        {
-            availableVideosList.Add(file.FullName);
-            
-
-        }
-        //player.url = fileName;
-       // player.Prepare();
-        //player.prepareCompleted += PlayVideo;
-
-        
+        AttachEventListeners();
     }
 
-    void PlayVideo(VideoPlayer source)
+    void PlayVideo(string url)
     {
+        player.url = url;
+        player.Prepare();
+        player.prepareCompleted += PlayVideoOnPlayer;
+    }
+
+    void PlayVideoOnPlayer(VideoPlayer source)
+    {
+        VideoPlayerReadyCB?.Invoke();
         if (source != null)
         {
             source.Play();
         }
-        float length = source.frameCount / source.frameRate;
-        currVideoLength = length;
-        movieSlider.minValue = 0;
-        movieSlider.maxValue = currVideoLength;
-        movieSlider.onValueChanged.AddListener(ChangeMovieRuntime);
-        Debug.Log("length : " + length);
+        currVideoLength = source.frameCount / source.frameRate;
+        videoSlider.minValue = 0;
+        videoSlider.maxValue = currVideoLength;
+        videoSlider.onValueChanged.AddListener(ChangeMovieRuntime);
+        UpdateVideoTimeCB?.Invoke(VideoUtility.GetTimeStampFromTotalTime(currVideoLength), true);
+    }
+
+    private void Update()
+    {
+        UpdateVideoSlider();
+    }
+
+    void UpdateVideoSlider()
+    {
+        videoSlider.SetValueWithoutNotify((float)player.time);
+        UpdateVideoTimeCB?.Invoke(VideoUtility.GetTimeStampFromTotalTime((float)player.time), false);
     }
 
     public void ChangeMovieRuntime(float value)
     {
-        if (!player.isPlaying)
-            return;
         player.time = value;
+        UpdateVideoTimeCB?.Invoke(VideoUtility.GetTimeStampFromTotalTime((float)player.time), false);
     }
 
-    public void PauseVideo()
+    public void ToggleVideoPlayPause()
+    {
+        isPaused = !isPaused;
+        UpdateVideoPlayBack();
+        VideoPlayPausedCB?.Invoke(isPaused);
+    }
+
+    private void UpdateVideoPlayBack()
+    {
+        if (isPaused)
+        {
+            PauseVideo();
+        }
+        else
+        {
+            PlayVideo();
+        }
+    }
+
+    private void PauseVideo()
     {
         if (player.isPlaying)
         {
@@ -74,12 +96,7 @@ public class VideoPlayerController : MonoBehaviour
         }
     }
 
-    public void StopVideo()
-    {
-
-    }
-
-    public void PlayVideo()
+    private void PlayVideo()
     {
         if (player.isPaused)
         {
@@ -112,5 +129,20 @@ public class VideoPlayerController : MonoBehaviour
     bool IsVideoPlayerRunning()
     {
         return player.isPlaying;
+    }
+
+    void AttachEventListeners()
+    {
+        VideoLibraryManager.PlayVideoCall += PlayVideo;
+    }
+
+    void DetachEventListeners()
+    {
+        VideoLibraryManager.PlayVideoCall -= PlayVideo;
+    }
+
+    private void OnDestroy()
+    {
+        DetachEventListeners();
     }
 }

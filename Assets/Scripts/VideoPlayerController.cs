@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Video;
 using UnityEngine.UI;
+using System.IO;
 
-public class VideoPlayerTest : MonoBehaviour
+public class VideoPlayerController : MonoBehaviour
 {
     public VideoPlayer player;
 
@@ -16,13 +17,41 @@ public class VideoPlayerTest : MonoBehaviour
 
     float currVideoLength;
 
+    string movieClipFolderPath = "";
+
     private void Start()
     {
-        currVideoLength = (float)clip.length;
-        movieSlider.minValue = 0;
-        movieSlider.maxValue = currVideoLength;
-        movieSlider.onValueChanged.AddListener(ChangeMovieRuntime);
+        //currVideoLength = (float)clip.length;
+        //  movieSlider.minValue = 0;
+        // movieSlider.maxValue = currVideoLength;
+        // movieSlider.onValueChanged.AddListener(ChangeMovieRuntime);
+        // movieClipFolderPath = Application.streamingAssetsPath + "/Videos/Video1.mp4";
+        //player.url = movieClipFolderPath;
+        //player.Prepare();
+        //player.prepareCompleted += PlayVideo;
+        movieClipFolderPath = Application.streamingAssetsPath + "/Videos";
+        DirectoryInfo d = new DirectoryInfo(movieClipFolderPath);
+        string fileName = "";
+        foreach (var file in d.GetFiles("*.mp4"))
+        {
+            Debug.Log(file.FullName);
+            fileName = file.FullName;
+            
 
+        }
+        player.url = fileName;
+        player.Prepare();
+        player.prepareCompleted += PlayVideo;
+    }
+
+    void PlayVideo(VideoPlayer source)
+    {
+        //if (source != null)
+        //{
+        //  source.Play();
+        //}
+        float length = source.frameCount / source.frameRate;
+        Debug.Log("length : " + length);
     }
 
     public void ChangeMovieRuntime(float value)

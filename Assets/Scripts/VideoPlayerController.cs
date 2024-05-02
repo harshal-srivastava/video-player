@@ -24,6 +24,9 @@ public class VideoPlayerController : MonoBehaviour
     public delegate void UpdateVideoPlaybackTime(string endingtime, bool doOnce);
     public static UpdateVideoPlaybackTime UpdateVideoTimeCB;
 
+    public delegate void VideoStopEvent();
+    public static VideoStopEvent VideoStopCB;
+
     private bool isPaused = false;
 
     private void Awake()
@@ -104,31 +107,33 @@ public class VideoPlayerController : MonoBehaviour
         }
     }
 
-    public void Skip10Seconds()
+    public void FastForward()
     {
-        if (!IsVideoPlayerRunning())
-            return;
         float playerTime = (float)player.time;
         playerTime += fastForwardTime;
         playerTime = Mathf.Clamp(playerTime, 0, currVideoLength);
-
         player.time = playerTime;
     }
 
-    public void Rewind10Seconds()
+    public void Rewind()
     {
-        if (!IsVideoPlayerRunning())
-            return;
         float playerTime = (float)player.time;
         playerTime -= fastForwardTime;
         playerTime = Mathf.Clamp(playerTime, 0, currVideoLength);
-
         player.time = playerTime;
     }
 
     bool IsVideoPlayerRunning()
     {
         return player.isPlaying;
+    }
+    
+    public void StopVideo()
+    {
+            player.Stop();
+            player.url = "";
+            VideoStopCB?.Invoke();
+            isPaused = false;
     }
 
     void AttachEventListeners()

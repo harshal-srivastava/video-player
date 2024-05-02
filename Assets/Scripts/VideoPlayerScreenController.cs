@@ -49,6 +49,15 @@ public class VideoPlayerScreenController : MonoBehaviour
     {
         VideoPlayerController.VideoPlayPausedCB += PlayPauseButtonPressed;
         VideoPlayerController.UpdateVideoTimeCB += UpdateVideoPlayBackTime;
+        VideoPlayerController.VideoStopCB += StopVideoAndDisableVideoScreen;
+    }
+
+    private void StopVideoAndDisableVideoScreen()
+    {
+        videoStartingTimeText.text = "";
+        videoEndingTimeText.text = "";
+        videoCurrentTimeText.text = "";
+        pauseButton.GetComponent<Image>().sprite = pauseVideoSprite;
     }
 
     private void UpdateVideoPlayBackTime(string time, bool doOnce)
@@ -67,6 +76,7 @@ public class VideoPlayerScreenController : MonoBehaviour
     private void DetachEventListeners()
     {
         VideoPlayerController.VideoPlayPausedCB -= PlayPauseButtonPressed;
+        VideoPlayerController.UpdateVideoTimeCB -= UpdateVideoPlayBackTime;
     }
 
     private void OnDestroy()

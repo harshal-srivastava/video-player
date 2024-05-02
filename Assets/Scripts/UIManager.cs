@@ -31,16 +31,24 @@ public class UIManager : MonoBehaviour
         tvPlayerScreen.SetActive(true);
     }
 
+    private void EnableGalleryScreen()
+    {
+        tvPlayerScreen.SetActive(false);
+        galleryScreen.SetActive(true);
+    }
+
     private void AttachEventListeners()
     {
         VideoLibraryManager.LibrarySetCB += OpenTVButtonPressed;
         VideoPlayerController.VideoPlayerReadyCB += OpenTVPlayerScreen;
+        VideoPlayerController.VideoStopCB += EnableGalleryScreen;
     }
 
     private void DetachEventListeners()
     {
         VideoLibraryManager.LibrarySetCB -= OpenTVButtonPressed;
-        VideoPlayerController.VideoPlayerReadyCB += OpenTVPlayerScreen;
+        VideoPlayerController.VideoPlayerReadyCB -= OpenTVPlayerScreen;
+        VideoPlayerController.VideoStopCB -= EnableGalleryScreen;
     }
 
     private void OnDestroy()

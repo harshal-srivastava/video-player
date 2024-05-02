@@ -19,12 +19,12 @@ public class VideoPlayerController : MonoBehaviour
 
     string movieClipFolderPath = "";
 
+    [SerializeField]
+    private List<string> availableVideosList;
+
     private void Start()
     {
-        //currVideoLength = (float)clip.length;
-        //  movieSlider.minValue = 0;
-        // movieSlider.maxValue = currVideoLength;
-        // movieSlider.onValueChanged.AddListener(ChangeMovieRuntime);
+        
         // movieClipFolderPath = Application.streamingAssetsPath + "/Videos/Video1.mp4";
         //player.url = movieClipFolderPath;
         //player.Prepare();
@@ -34,23 +34,28 @@ public class VideoPlayerController : MonoBehaviour
         string fileName = "";
         foreach (var file in d.GetFiles("*.mp4"))
         {
-            Debug.Log(file.FullName);
-            fileName = file.FullName;
+            availableVideosList.Add(file.FullName);
             
 
         }
-        player.url = fileName;
-        player.Prepare();
-        player.prepareCompleted += PlayVideo;
+        //player.url = fileName;
+       // player.Prepare();
+        //player.prepareCompleted += PlayVideo;
+
+        
     }
 
     void PlayVideo(VideoPlayer source)
     {
-        //if (source != null)
-        //{
-        //  source.Play();
-        //}
+        if (source != null)
+        {
+            source.Play();
+        }
         float length = source.frameCount / source.frameRate;
+        currVideoLength = length;
+        movieSlider.minValue = 0;
+        movieSlider.maxValue = currVideoLength;
+        movieSlider.onValueChanged.AddListener(ChangeMovieRuntime);
         Debug.Log("length : " + length);
     }
 

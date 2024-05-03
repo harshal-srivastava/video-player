@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+/// <summary>
+/// Class responsible for updating visuals and UI when the video is being played
+/// </summary>
 public class VideoPlayerScreenController : MonoBehaviour
 {
     [SerializeField]
@@ -36,7 +39,11 @@ public class VideoPlayerScreenController : MonoBehaviour
         AttachEventListeners();
     }
 
-    public void PlayPauseButtonPressed(bool isPaused)
+    /// <summary>
+    /// Callback function to update the pause button sprite
+    /// </summary>
+    /// <param name="isPaused"></param>
+    private void PlayPauseButtonPressed(bool isPaused)
     {
         if (isPaused)
         {
@@ -48,6 +55,9 @@ public class VideoPlayerScreenController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Function to attach listeners to respective class game events
+    /// </summary>
     private void AttachEventListeners()
     {
         VideoPlayerController.VideoPlayPausedCB += PlayPauseButtonPressed;
@@ -56,6 +66,9 @@ public class VideoPlayerScreenController : MonoBehaviour
         VideoPlayerController.VideoEndedCB += EnablePlayAgainButton;
     }
 
+    /// <summary>
+    /// Function call to reset the visual elements to their default state when user presses cross button
+    /// </summary>
     private void StopVideoAndDisableVideoScreen()
     {
         videoStartingTimeText.text = "";
@@ -65,6 +78,11 @@ public class VideoPlayerScreenController : MonoBehaviour
         playAgainButton.SetActive(false);
     }
 
+    /// <summary>
+    /// Function to update the video initial, current and final time
+    /// </summary>
+    /// <param name="time"></param>
+    /// <param name="doOnce"></param>
     private void UpdateVideoPlayBackTime(string time, bool doOnce)
     {
         if (doOnce)
@@ -83,13 +101,21 @@ public class VideoPlayerScreenController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Function to enable play again button after a video is finished
+    /// </summary>
     private void EnablePlayAgainButton()
     {
         playAgainButton.SetActive(true);
         videoPlayBackControlsGroup.alpha = 0;
     }
 
-
+    /// <summary>
+    /// Function to detach listeners to respective class game events
+    /// This is done as a safe keeping in future if a scene reload is required
+    /// Static events couple with delegates don't work so well on scene reloads
+    /// So detach them if object is destroyed and it will be attached again when instance of class is created
+    /// </summary>
     private void DetachEventListeners()
     {
         VideoPlayerController.VideoPlayPausedCB -= PlayPauseButtonPressed;

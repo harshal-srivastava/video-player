@@ -7,6 +7,9 @@ using TMPro;
 using UnityEngine.Networking;
 using UnityEngine.Video;
 
+/// <summary>
+/// Class responsible for loading all the videos in the application and displaying them in the gallery
+/// </summary>
 public class VideoLibraryManager : MonoBehaviour
 {
     [SerializeField]
@@ -26,23 +29,16 @@ public class VideoLibraryManager : MonoBehaviour
     public delegate void PlayVideoEvent(VideoClip video);
     public static PlayVideoEvent PlayVideoCall;
 
-    public TextMeshProUGUI debugText;
-
     private void Awake()
     {
         GetAllAvailableVideos();
     }
 
+    /// <summary>
+    /// Function to load all available videos from resources folder
+    /// </summary>
     private void GetAllAvailableVideos()
     {
-        /*videosLibraryPath = Application.streamingAssetsPath;
-        DirectoryInfo d = new DirectoryInfo(videosLibraryPath);
-        Debug.LogError("[video debugging] directory path : " + d.FullName);
-        Debug.LogError("[video debugging] directory path : " + videosLibraryPath);
-        foreach (var file in d.GetFiles("*.mp4"))
-        {
-            availableLibraryOfVideosList.Add(file.FullName);
-        }*/
         VideoClip[] items = Resources.LoadAll<VideoClip>("Videos/");
         for (int i=0;i<items.Length;i++)
         {
@@ -50,11 +46,18 @@ public class VideoLibraryManager : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Function called when user presses the button on TV
+    /// </summary>
     public void OpenTVPressed()
     {
         SetLibraryGrid();
     }
 
+    /// <summary>
+    /// Sets the display grid of the gallery with all available videos
+    /// </summary>
     private void SetLibraryGrid()
     {
         for (int i=0;i<availableLibraryOfVideosList.Count;i++)
@@ -66,6 +69,10 @@ public class VideoLibraryManager : MonoBehaviour
         LibrarySetCB?.Invoke();
     }
 
+    /// <summary>
+    /// Single listener funtion for all video thumbnail buttons
+    /// </summary>
+    /// <param name="index"></param>
     private void PlayVideoWithIndex(int index)
     {
         Debug.Log("playing video : " + index);

@@ -5,6 +5,10 @@ using UnityEngine.Video;
 using UnityEngine.UI;
 using System.IO;
 
+/// <summary>
+/// Class responsible for the video player functionalities
+/// Which includes playing video, pause, rewind, fastforward, seek, etc
+/// </summary>
 public class VideoPlayerController : MonoBehaviour
 {
     public VideoPlayer player;
@@ -42,8 +46,14 @@ public class VideoPlayerController : MonoBehaviour
         AttachEventListeners();
     }
 
+    /// <summary>
+    /// Callback function to play the video passed as parameter
+    /// </summary>
+    /// <param name="video"></param>
     void PlayVideo(VideoClip video)
     {
+        //additional condition added because video player
+        //shows some issue when we try to play the last video played
         if (player.clip != null)
         {
             player.clip = null;
@@ -55,17 +65,28 @@ public class VideoPlayerController : MonoBehaviour
         currVideo = video;
     }
 
+    /// <summary>
+    /// Callback function for when video ends
+    /// </summary>
+    /// <param name="player"></param>
     void DisableVideoPlayer(VideoPlayer player)
     {
         videoPlayer3DObject.SetActive(false);
         VideoEndedCB?.Invoke();
     }
 
+    /// <summary>
+    /// Function called when user presses the button to play last played video again
+    /// </summary>
     public void PlayCurrentVideoAgain()
     {
         PlayVideo(currVideo);
     }
 
+    /// <summary>
+    /// Callback function for when the video player is prepared to show the video
+    /// </summary>
+    /// <param name="source"></param>
     void PlayVideoOnPlayer(VideoPlayer source)
     {
         VideoPlayerReadyCB?.Invoke();
@@ -77,6 +98,10 @@ public class VideoPlayerController : MonoBehaviour
         SetScreenVariables(source);
     }
 
+    /// <summary>
+    /// Set the initial and total length of the video
+    /// </summary>
+    /// <param name="source"></param>
     void SetScreenVariables(VideoPlayer source)
     {
         currVideoLength = source.frameCount / source.frameRate;
@@ -86,6 +111,9 @@ public class VideoPlayerController : MonoBehaviour
         UpdateVideoTimeCB?.Invoke(VideoUtility.GetTimeStampFromTotalTime(currVideoLength), true);
     }
 
+    /// <summary>
+    /// Function to enable the Quad using the video render texture
+    /// </summary>
     void EnableVideoScreen()
     {
         if (!videoPlayer3DObject.activeSelf)
@@ -99,18 +127,28 @@ public class VideoPlayerController : MonoBehaviour
         UpdateVideoSlider();
     }
 
+    /// <summary>
+    /// Function to keep updating the slider as the video progresses
+    /// </summary>
     void UpdateVideoSlider()
     {
         videoSlider.SetValueWithoutNotify((float)player.time);
         UpdateVideoTimeCB?.Invoke(VideoUtility.GetTimeStampFromTotalTime((float)player.time), false);
     }
 
+    /// <summary>
+    /// Callback function to add seek functionality in the video player
+    /// </summary>
+    /// <param name="value"></param>
     public void ChangeMovieRuntime(float value)
     {
         player.time = value;
         UpdateVideoTimeCB?.Invoke(VideoUtility.GetTimeStampFromTotalTime((float)player.time), false);
     }
 
+    /// <summary>
+    /// Function to toggle the video playing or pausing state
+    /// </summary>
     public void ToggleVideoPlayPause()
     {
         isPaused = !isPaused;
@@ -118,6 +156,9 @@ public class VideoPlayerController : MonoBehaviour
         VideoPlayPausedCB?.Invoke(isPaused);
     }
 
+    /// <summary>
+    /// Function to update the video playback wether it is paused or is playing
+    /// </summary>
     private void UpdateVideoPlayBack()
     {
         if (isPaused)
@@ -130,6 +171,9 @@ public class VideoPlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Function call to pause the video
+    /// </summary>
     private void PauseVideo()
     {
         if (player.isPlaying)
@@ -138,6 +182,9 @@ public class VideoPlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Function call to play the video from paused state
+    /// </summary>
     private void PlayVideo()
     {
         if (player.isPaused)
@@ -146,6 +193,9 @@ public class VideoPlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Function call to fast forward the video
+    /// </summary>
     public void FastForward()
     {
         float playerTime = (float)player.time;
@@ -154,6 +204,10 @@ public class VideoPlayerController : MonoBehaviour
         player.time = playerTime;
     }
 
+    /// <summary>
+    /// Function call to rewind the video
+    /// PS: The amount of time forwarded or reversed is controlled by variable "fastForwardTime"
+    /// </summary>
     public void Rewind()
     {
         float playerTime = (float)player.time;
@@ -162,11 +216,18 @@ public class VideoPlayerController : MonoBehaviour
         player.time = playerTime;
     }
 
+    /// <summary>
+    /// Function to check if videoplayer is running or not
+    /// </summary>
+    /// <returns></returns>
     bool IsVideoPlayerRunning()
     {
         return player.isPlaying;
     }
     
+    /// <summary>
+    /// Function called when user presses cross button on video playback screen
+    /// </summary>
     public void StopVideo()
     {
             player.Stop();
@@ -176,11 +237,20 @@ public class VideoPlayerController : MonoBehaviour
         videoPlayer3DObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Function to attach listeners to respective class game events
+    /// </summary>
     void AttachEventListeners()
     {
         VideoLibraryManager.PlayVideoCall += PlayVideo;
     }
 
+    /// <summary>
+    /// Function to detach listeners to respective class game events
+    /// This is done as a safe keeping in future if a scene reload is required
+    /// Static events couple with delegates don't work so well on scene reloads
+    /// So detach them if object is destroyed and it will be attached again when instance of class is created
+    /// </summary>
     void DetachEventListeners()
     {
         VideoLibraryManager.PlayVideoCall -= PlayVideo;

@@ -32,7 +32,7 @@ public class VideoPlayerController : MonoBehaviour
 
     private bool isPaused = false;
 
-    private string currVideoURL = "";
+    private VideoClip currVideo;
 
     [SerializeField]
     private GameObject videoPlayer3DObject;
@@ -42,13 +42,17 @@ public class VideoPlayerController : MonoBehaviour
         AttachEventListeners();
     }
 
-    void PlayVideo(string url)
+    void PlayVideo(VideoClip video)
     {
-        player.url = url;
+        if (player.clip != null)
+        {
+            player.clip = null;
+        }
+        player.clip = video;
         player.Prepare();
         player.prepareCompleted += PlayVideoOnPlayer;
         player.loopPointReached += DisableVideoPlayer;
-        currVideoURL = url;
+        currVideo = video;
     }
 
     void DisableVideoPlayer(VideoPlayer player)
@@ -59,7 +63,7 @@ public class VideoPlayerController : MonoBehaviour
 
     public void PlayCurrentVideoAgain()
     {
-        PlayVideo(currVideoURL);
+        PlayVideo(currVideo);
     }
 
     void PlayVideoOnPlayer(VideoPlayer source)
@@ -68,16 +72,26 @@ public class VideoPlayerController : MonoBehaviour
         if (source != null)
         {
             source.Play();
-            if (!videoPlayer3DObject.activeSelf)
-            {
-                videoPlayer3DObject.SetActive(true);
-            }
+            EnableVideoScreen();
         }
+        SetScreenVariables(source);
+    }
+
+    void SetScreenVariables(VideoPlayer source)
+    {
         currVideoLength = source.frameCount / source.frameRate;
         videoSlider.minValue = 0;
         videoSlider.maxValue = currVideoLength;
         videoSlider.onValueChanged.AddListener(ChangeMovieRuntime);
         UpdateVideoTimeCB?.Invoke(VideoUtility.GetTimeStampFromTotalTime(currVideoLength), true);
+    }
+
+    void EnableVideoScreen()
+    {
+        if (!videoPlayer3DObject.activeSelf)
+        {
+            videoPlayer3DObject.SetActive(true);
+        }
     }
 
     private void Update()

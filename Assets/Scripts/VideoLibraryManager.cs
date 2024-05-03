@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using UnityEngine.UI;
+using TMPro;
+using UnityEngine.Networking;
+using UnityEngine.Video;
 
 public class VideoLibraryManager : MonoBehaviour
 {
     [SerializeField]
-    private List<string> availableLibraryOfVideosList;
+    private List<VideoClip> availableLibraryOfVideosList;
 
     private string videosLibraryPath = "";
 
@@ -20,8 +23,10 @@ public class VideoLibraryManager : MonoBehaviour
     public delegate void LibraryGridSetCallBack();
     public static LibraryGridSetCallBack LibrarySetCB;
 
-    public delegate void PlayVideoEvent(string videoURL);
+    public delegate void PlayVideoEvent(VideoClip video);
     public static PlayVideoEvent PlayVideoCall;
+
+    public TextMeshProUGUI debugText;
 
     private void Awake()
     {
@@ -30,11 +35,18 @@ public class VideoLibraryManager : MonoBehaviour
 
     private void GetAllAvailableVideos()
     {
-        videosLibraryPath = Application.streamingAssetsPath;
+        /*videosLibraryPath = Application.streamingAssetsPath;
         DirectoryInfo d = new DirectoryInfo(videosLibraryPath);
+        Debug.LogError("[video debugging] directory path : " + d.FullName);
+        Debug.LogError("[video debugging] directory path : " + videosLibraryPath);
         foreach (var file in d.GetFiles("*.mp4"))
         {
             availableLibraryOfVideosList.Add(file.FullName);
+        }*/
+        VideoClip[] items = Resources.LoadAll<VideoClip>("Videos/");
+        for (int i=0;i<items.Length;i++)
+        {
+            availableLibraryOfVideosList.Add(items[i]);
         }
     }
 

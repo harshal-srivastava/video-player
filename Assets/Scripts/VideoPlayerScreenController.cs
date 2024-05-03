@@ -74,6 +74,7 @@ public class VideoPlayerScreenController : MonoBehaviour
             if (videoPlayBackControlsGroup.alpha == 0)
             {
                 videoPlayBackControlsGroup.alpha = 1;
+                playAgainButton.SetActive(false);
             }
         }
         else

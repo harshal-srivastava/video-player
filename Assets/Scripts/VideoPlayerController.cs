@@ -27,7 +27,15 @@ public class VideoPlayerController : MonoBehaviour
     public delegate void VideoStopEvent();
     public static VideoStopEvent VideoStopCB;
 
+    public delegate void VideoEndedEvent();
+    public static VideoEndedEvent VideoEndedCB;
+
     private bool isPaused = false;
+
+    private string currVideoURL = "";
+
+    [SerializeField]
+    private GameObject videoPlayer3DObject;
 
     private void Awake()
     {
@@ -39,6 +47,19 @@ public class VideoPlayerController : MonoBehaviour
         player.url = url;
         player.Prepare();
         player.prepareCompleted += PlayVideoOnPlayer;
+        player.loopPointReached += DisableVideoPlayer;
+        currVideoURL = url;
+    }
+
+    void DisableVideoPlayer(VideoPlayer player)
+    {
+        videoPlayer3DObject.SetActive(false);
+        VideoEndedCB?.Invoke();
+    }
+
+    public void PlayCurrentVideoAgain()
+    {
+        PlayVideo(currVideoURL);
     }
 
     void PlayVideoOnPlayer(VideoPlayer source)
@@ -47,6 +68,10 @@ public class VideoPlayerController : MonoBehaviour
         if (source != null)
         {
             source.Play();
+            if (!videoPlayer3DObject.activeSelf)
+            {
+                videoPlayer3DObject.SetActive(true);
+            }
         }
         currVideoLength = source.frameCount / source.frameRate;
         videoSlider.minValue = 0;
@@ -134,6 +159,7 @@ public class VideoPlayerController : MonoBehaviour
             player.url = "";
             VideoStopCB?.Invoke();
             isPaused = false;
+        videoPlayer3DObject.SetActive(false);
     }
 
     void AttachEventListeners()

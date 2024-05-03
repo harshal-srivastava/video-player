@@ -13,6 +13,9 @@ public class VideoPlayerScreenController : MonoBehaviour
     private Button pauseButton;
 
     [SerializeField]
+    private GameObject playAgainButton;
+
+    [SerializeField]
     private Sprite pauseVideoSprite;
 
     [SerializeField]
@@ -50,6 +53,7 @@ public class VideoPlayerScreenController : MonoBehaviour
         VideoPlayerController.VideoPlayPausedCB += PlayPauseButtonPressed;
         VideoPlayerController.UpdateVideoTimeCB += UpdateVideoPlayBackTime;
         VideoPlayerController.VideoStopCB += StopVideoAndDisableVideoScreen;
+        VideoPlayerController.VideoEndedCB += EnablePlayAgainButton;
     }
 
     private void StopVideoAndDisableVideoScreen()
@@ -58,6 +62,7 @@ public class VideoPlayerScreenController : MonoBehaviour
         videoEndingTimeText.text = "";
         videoCurrentTimeText.text = "";
         pauseButton.GetComponent<Image>().sprite = pauseVideoSprite;
+        playAgainButton.SetActive(false);
     }
 
     private void UpdateVideoPlayBackTime(string time, bool doOnce)
@@ -66,6 +71,10 @@ public class VideoPlayerScreenController : MonoBehaviour
         {
             videoStartingTimeText.text = time.Length == 5 ? "00:00" :"00:00:00";
             videoEndingTimeText.text = time;
+            if (videoPlayBackControlsGroup.alpha == 0)
+            {
+                videoPlayBackControlsGroup.alpha = 1;
+            }
         }
         else
         {
@@ -73,10 +82,19 @@ public class VideoPlayerScreenController : MonoBehaviour
         }
     }
 
+    private void EnablePlayAgainButton()
+    {
+        playAgainButton.SetActive(true);
+        videoPlayBackControlsGroup.alpha = 0;
+    }
+
+
     private void DetachEventListeners()
     {
         VideoPlayerController.VideoPlayPausedCB -= PlayPauseButtonPressed;
         VideoPlayerController.UpdateVideoTimeCB -= UpdateVideoPlayBackTime;
+        VideoPlayerController.VideoStopCB -= StopVideoAndDisableVideoScreen;
+        VideoPlayerController.VideoEndedCB -= EnablePlayAgainButton;
     }
 
     private void OnDestroy()
